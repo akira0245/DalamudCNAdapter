@@ -2,8 +2,8 @@
   "Author": "akira0245",
   "Name": "DalamudCNAdapter",
   "Punchline": "Add Chinese font/command support for dalamud global version.",
-  "Description": "",
-  "RepoUrl": "",
+  "Description": "Add Chinese font/command support for dalamud global version.",
+  "RepoUrl": "https://github.com/akira0245/DalamudCNAdapter",
   "Tags": [
     "akira",
     "font",
