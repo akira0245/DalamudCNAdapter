@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using Dalamud;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
@@ -22,7 +23,7 @@ namespace DalamudCNAdapter
 				uivisible = true;
 			}
 
-			if (DalamudCNAdapterConfig.Instance.RunOnStart)
+			//if (DalamudCNAdapterConfig.Instance.RunOnStart)
 			{
 				if (DalamudCNAdapterConfig.Instance.ReplaceFont)
 				{
@@ -30,17 +31,17 @@ namespace DalamudCNAdapter
 				}
 				else
 				{
-					FontReplacer.RestoreMainFont();
+					//FontReplacer.RestoreMainFont();
 				}
 
 				if (DalamudCNAdapterConfig.Instance.ReplaceCommand)
 				{
 					CommandManagerReplacer.ReplaceCommanRegex();
 				}
-				else
-				{
-					CommandManagerReplacer.RestoreCommanRegex();
-				}
+				//else
+				//{
+				//	CommandManagerReplacer.RestoreCommanRegex();
+				//}
 			}
 		}
 
@@ -55,12 +56,20 @@ namespace DalamudCNAdapter
 		{
 			if (!uivisible) return;
 
-			ImGui.SetNextWindowSize(ImGuiHelpers.ScaledVector2(240,160));
-			if (ImGui.Begin("DalamudCNAdapter Config", ref uivisible, ImGuiWindowFlags.AlwaysAutoResize))
+			if (ImGui.Begin("DalamudCNAdapter", ref uivisible, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse))
 			{
-				if (ImGui.Checkbox("Auto run", ref DalamudCNAdapterConfig.Instance.RunOnStart))
+				//if (ImGui.Checkbox("Auto run", ref DalamudCNAdapterConfig.Instance.RunOnStart))
+				//{
+				//	DalamudCNAdapterConfig.Instance.Save();
+				//}
+				ImGui.SetNextWindowPos(ImGui.GetWindowViewport().GetCenter(), ImGuiCond.Always, new Vector2(0.5f, 0.5f));
+
+				if (ImGui.BeginPopup("DalamudCNAdapter 提示", ImGuiWindowFlags.Popup | ImGuiWindowFlags.Modal | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration))
 				{
-					DalamudCNAdapterConfig.Instance.Save();
+					ImGui.TextUnformatted("字体替换将在下次游戏启动时失效。\n\n");
+
+					if (ImGui.Button("OK", new Vector2(-1, ImGui.GetFrameHeight()))) ImGui.CloseCurrentPopup();
+					ImGui.EndPopup();
 				}
 
 				if (ImGui.Checkbox("ReplaceFont", ref DalamudCNAdapterConfig.Instance.ReplaceFont))
@@ -71,7 +80,8 @@ namespace DalamudCNAdapter
 					}
 					else
 					{
-						FontReplacer.RestoreMainFont();
+						ImGui.OpenPopup("DalamudCNAdapter 提示");
+						//FontReplacer.RestoreMainFont();
 					}
 
 					DalamudCNAdapterConfig.Instance.Save();
@@ -97,7 +107,7 @@ namespace DalamudCNAdapter
 
 		public void Dispose()
 		{
-			FontReplacer.RestoreMainFont();
+			//FontReplacer.RestoreMainFont();
 			CommandManagerReplacer.RestoreCommanRegex();
 			DalamudPluginInterface.UiBuilder.Draw -= UiBuilder_Draw;
 			DalamudPluginInterface.UiBuilder.OpenConfigUi -= UiBuilder_OpenConfigUi;

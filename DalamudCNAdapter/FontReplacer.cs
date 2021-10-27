@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -19,50 +20,56 @@ namespace DalamudCNAdapter
 			_fontFilename = Path.Combine(Assembly.GetExecutingAssembly().Location, "..", "NotoSansCJKsc-Medium.otf");
 		}
 
-		public static void ReplaceMainFont()
+		private static bool replaced = false;
+		public unsafe static void ReplaceMainFont()
 		{
+			if (replaced) return;
+
 			if (!File.Exists(_fontFilename))
 			{
 				throw new FileNotFoundException($"{_fontFilename} not found");
 			}
 
-			originalFont = DefaultFont;
+			//OriginalDefaultFont = DalamudDefaultFont;
+
 			DalamudCNAdapter.DalamudPluginInterface.UiBuilder.BuildFonts += UiBuilder_BuildFonts;
-			DalamudCNAdapter.DalamudPluginInterface.UiBuilder.Draw += pushMyFont;
 			DalamudCNAdapter.DalamudPluginInterface.UiBuilder.RebuildFonts();
 
+			DalamudCNAdapter.DalamudPluginInterface.UiBuilder.Draw += pushMyFont;
 			static void pushMyFont()
 			{
 				if (myFont.HasValue)
 				{
-					DefaultFont = myFont.Value;
-					ImGui.PushFont(myFont.Value);
+					var fonts = ImGui.GetIO().Fonts;
+					fonts.Fonts[0] = myFont.Value;
+					DalamudDefaultFont = myFont.Value;
 					DalamudCNAdapter.DalamudPluginInterface.UiBuilder.Draw -= pushMyFont;
+					replaced = true;
 				}
 			}
 		}
 
 
-		public static void RestoreMainFont()
-		{
-			if (!myFont.HasValue) return;
-			myFont = null;
+		//public static void RestoreMainFont()
+		//{
+		//	if (!OriginalDefaultFont.HasValue) return;
 
-			DefaultFont = originalFont;
-			ImGui.PopFont();
-			DalamudCNAdapter.DalamudPluginInterface.UiBuilder.BuildFonts -= UiBuilder_BuildFonts;
-			DalamudCNAdapter.DalamudPluginInterface.UiBuilder.RebuildFonts();
-		}
+		//	var fonts = ImGui.GetIO().Fonts;
+		//	fonts.Fonts[0] = fonts.Fonts[fonts.Fonts.Size - 1];
+		//	DalamudDefaultFont = fonts.Fonts[fonts.Fonts.Size - 1];
 
+		//	DalamudCNAdapter.DalamudPluginInterface.UiBuilder.BuildFonts -= UiBuilder_BuildFonts;
+		//	DalamudCNAdapter.DalamudPluginInterface.UiBuilder.RebuildFonts();
+		//}
 
-		private static ImFontPtr DefaultFont
+		private static ImFontPtr DalamudDefaultFont
 		{
 			get => UiBuilder.DefaultFont;
 			set => _defaultFont.SetValue(_interfaceManager, value);
 		}
 
 		private static ImFontPtr? myFont = null;
-		private static ImFontPtr originalFont;
+		private static ImFontPtr? OriginalDefaultFont = null;
 
 		private static readonly PropertyInfo _defaultFont;
 		private static readonly object _interfaceManager;
