@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Threading.Tasks;
 using Dalamud;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
@@ -13,13 +14,22 @@ namespace DalamudCNAdapter
 	{
 		[PluginService] public static DalamudPluginInterface DalamudPluginInterface { get; set; }
 		public DalamudFontReplacer()
-		{
-			FontReplacer.ReplaceMainFont();
+        {
+            if (DalamudPluginInterface.Reason == PluginLoadReason.Boot)
+            {
+				Task.Delay(5000).ContinueWith(task => FontReplacer.ReplaceMainFont());
+			}
+            else
+            {
+                FontReplacer.ReplaceMainFont();
+            }
+			DalamudFontReplacerConfig.Instance.Save();
 		}
 
 
-		public void Dispose()
+        public void Dispose()
 		{
+			DalamudFontReplacerConfig.Instance.Save();
 		}
 
 		public string Name => nameof(DalamudFontReplacer);
